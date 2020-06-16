@@ -43,7 +43,7 @@ const runSpotifySearch = (query) => {
       function (data) {
         setTimeout(() => {
           resolve(getSpotifyTrackData(data.body));
-        }, 1000);
+        }, 2000);
       },
       function (err) {
         console.log("Something went wrong!", err);

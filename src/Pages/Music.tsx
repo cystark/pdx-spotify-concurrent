@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import shortid from "shortid";
 import styled from "styled-components";
 
@@ -27,9 +27,12 @@ const ResultsPrompt = styled.div`
 /**
  * Search -> Loading -> Display Resul
  **/
+let result;
+let spotifyPromise;
+spotifyPromise = getSongsData("hello").then((d) => (result = d));
 
 const MusicPage = (): React.FC => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(undefined);
   const [search, setSearch] = useState("");
   const inputRef = useRef(null);
 
@@ -39,6 +42,35 @@ const MusicPage = (): React.FC => {
       getSongsData(inputRef.current.value).then((d) => setData(d));
     }
   };
+
+  const MusicTable = () => {
+    if (!result) {
+      throw spotifyPromise;
+    }
+    return (
+      <Table>
+        <thead>
+          <tr>
+            <th>Artist</th>
+            <th>Song</th>
+            <th>Url</th>
+          </tr>
+        </thead>
+        <tbody>
+          {result.map(({ artist, song, url }) => (
+            <tr key={shortid.generate()}>
+              <td>{artist}</td>
+              <td>{song}</td>
+              <td>
+                <a href={url}>{url}</a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    );
+  };
+
   return (
     <Container>
       <section>
@@ -54,26 +86,9 @@ const MusicPage = (): React.FC => {
             <input ref={inputRef} onKeyDown={onKeyDown} type="search" />
           </label>
         </StyledInputContainer>
-        <Table>
-          <thead>
-            <tr>
-              <th>Artist</th>
-              <th>Song</th>
-              <th>Url</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map(({ artist, song, url }) => (
-              <tr key={shortid.generate()}>
-                <td>{artist}</td>
-                <td>{song}</td>
-                <td>
-                  <a href={url}>{url}</a>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+        <React.Suspense fallback={<div>...Loading</div>}>
+          <MusicTable />
+        </React.Suspense>
       </section>
     </Container>
   );
