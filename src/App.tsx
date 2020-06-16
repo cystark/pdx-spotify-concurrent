@@ -4,7 +4,7 @@ import Nav from "./Components/Nav";
 import Music from "./Pages/Music";
 import Home from "./Pages/Home";
 
-const App = (): React.Fc => (
+const App = () => (
   <>
     <Nav />
     <hr />

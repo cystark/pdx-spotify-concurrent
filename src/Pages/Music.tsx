@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import shortid from "shortid";
 import styled from "styled-components";
 
 import Container from "../Components/Container";
 import Table from "../Components/Table";
 import { getSongsData } from "../api";
+import ErrorBoundary from "../Utils/ErrorBoundary";
 
 const StyledInputContainer = styled.div`
   label {
@@ -27,23 +28,33 @@ const ResultsPrompt = styled.div`
 /**
  * Search -> Loading -> Display Resul
  **/
-let result;
-let spotifyPromise;
-spotifyPromise = getSongsData("hello").then((d) => (result = d));
 
-const MusicPage = (): React.FC => {
-  const [data, setData] = useState(undefined);
+let result;
+let errors;
+let spotifyPromise;
+spotifyPromise = getSongsData("").then(
+  (d) => (result = d),
+  (e) => (errors = e)
+);
+
+const MusicPage = () => {
   const [search, setSearch] = useState("");
-  const inputRef = useRef(null);
+  const inputRef = useRef() as React.MutableRefObject<HTMLInputElement>;
 
   const onKeyDown = (event) => {
     if (event.key === "Enter") {
-      setSearch(inputRef.current.value);
-      getSongsData(inputRef.current.value).then((d) => setData(d));
+      const ref = inputRef.current;
+      if (ref) {
+        setSearch(ref.value);
+        // getSongsData(ref.value).then((d) => setData(d));
+      }
     }
   };
 
   const MusicTable = () => {
+    if (errors) {
+      throw errors;
+    }
     if (!result) {
       throw spotifyPromise;
     }
@@ -86,9 +97,11 @@ const MusicPage = (): React.FC => {
             <input ref={inputRef} onKeyDown={onKeyDown} type="search" />
           </label>
         </StyledInputContainer>
-        <React.Suspense fallback={<div>...Loading</div>}>
-          <MusicTable />
-        </React.Suspense>
+        <ErrorBoundary>
+          <React.Suspense fallback={<div>...Loading</div>}>
+            <MusicTable />
+          </React.Suspense>
+        </ErrorBoundary>
       </section>
     </Container>
   );

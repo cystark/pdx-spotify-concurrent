@@ -5,9 +5,8 @@ import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import { BrowserRouter as Router } from "react-router-dom";
 
-const rootEl = document.getElementById("root");
-const root = ReactDOM.unstable_createRoot(rootEl);
-root.render(
+const rootEl = document.getElementById("root") as HTMLElement;
+ReactDOM.unstable_createRoot(rootEl).render(
   <React.StrictMode>
     <Router>
       <App />

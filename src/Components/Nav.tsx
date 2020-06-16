@@ -17,7 +17,7 @@ const StyledNavigation = styled(Container)`
   }
 `;
 
-const Nav = (): React.FC => (
+const Nav = () => (
   <StyledNavigation>
     <ul>
       <li>

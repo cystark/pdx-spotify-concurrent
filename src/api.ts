@@ -37,8 +37,14 @@ const spotifyApi = new SpotifyWebApi({
 });
 spotifyApi.setAccessToken(process.env.REACT_APP_SPOTIFY_AUTH_CODE);
 
+type dataProps = {
+  artist: string;
+  song: string;
+  url: string;
+};
+
 const runSpotifySearch = (query) => {
-  return new Promise((resolve) => {
+  return new Promise<dataProps[]>((resolve, reject) => {
     spotifyApi.searchTracks(query).then(
       function (data) {
         setTimeout(() => {
@@ -46,7 +52,7 @@ const runSpotifySearch = (query) => {
         }, 2000);
       },
       function (err) {
-        console.log("Something went wrong!", err);
+        reject(err);
       }
     );
   });
