@@ -1,14 +1,12 @@
-import React, { useState, useRef, unstable_useTransition } from "react";
+import React, { useState, useRef } from "react";
 import shortid from "shortid";
 import styled from "styled-components";
 
 import Container from "../Components/Container";
 import Table from "../Components/Table";
 import Loading from "../Components/Loading";
-
-import { getSongsData } from "../api";
 import ErrorBoundary from "../Utils/ErrorBoundary";
-import createResource from "../Utils/createResource";
+import useSpotifySearch from "../Utils/useSpotifySearch";
 
 const StyledWrap = styled(Container)`
   padding: 20px 0;
@@ -38,10 +36,6 @@ const ResultsPrompt = styled.div`
  * Search -> Loading -> Display Resul
  **/
 
-type createResourceProp = {
-  read: () => void;
-};
-
 const MusicTable = ({ resource }) => {
   const data = resource.read();
   return (
@@ -70,12 +64,8 @@ const MusicTable = ({ resource }) => {
 
 const MusicPage = () => {
   const [search, setSearch] = useState("");
-  const [resource, setResource] = useState<createResourceProp | null>(null);
-  const [startTransition, isPending] = unstable_useTransition({
-    timeoutMs: 4000,
-    busyDelayMs: 400,
-    busyMinDurationMs: 500,
-  });
+  const [resource, isPending] = useSpotifySearch(search);
+
   const inputRef = useRef() as React.MutableRefObject<HTMLInputElement>;
 
   const onKeyDown = (event) => {
@@ -83,9 +73,6 @@ const MusicPage = () => {
       const ref = inputRef.current;
       if (ref) {
         setSearch(ref.value);
-        startTransition(() => {
-          setResource(createResource(() => getSongsData(ref.value)));
-        });
       }
     }
   };
@@ -108,7 +95,7 @@ const MusicPage = () => {
           )}
           <StyledInputContainer>
             <label>
-              <span>Search Artist</span>
+              <span>Search Spotify</span>
               <input ref={inputRef} onKeyDown={onKeyDown} type="search" />
             </label>
           </StyledInputContainer>

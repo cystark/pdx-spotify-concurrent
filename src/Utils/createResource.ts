@@ -1,3 +1,7 @@
+export type createResourceProp = {
+  read: () => void;
+};
+
 export default function createResource(asyncFn) {
   let status = "pending";
   let result;
