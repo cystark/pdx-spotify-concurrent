@@ -108,15 +108,17 @@ const MusicPage = () => {
   return (
     <>
       <Banners>
-        <React.Suspense fallback={<BannerLoading />}>
-          <TopTracksBanner />
-        </React.Suspense>
-        <React.Suspense fallback={<BannerLoading />}>
-          <PlaylistsBanner />
-        </React.Suspense>
-        <React.Suspense fallback={<BannerLoading />}>
-          <MusicNewsBanner />
-        </React.Suspense>
+        <React.unstable_SuspenseList revealOrder="forwards">
+          <React.Suspense fallback={<BannerLoading />}>
+            <TopTracksBanner />
+          </React.Suspense>
+          <React.Suspense fallback={<BannerLoading />}>
+            <PlaylistsBanner />
+          </React.Suspense>
+          <React.Suspense fallback={<BannerLoading />}>
+            <MusicNewsBanner />
+          </React.Suspense>
+        </React.unstable_SuspenseList>
       </Banners>
 
       <StyledWrap theme={isPending ? "#f9f9f9" : "white"}>
