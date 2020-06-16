@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, unstable_useTransition } from "react";
 import shortid from "shortid";
 import styled from "styled-components";
 
@@ -65,6 +65,9 @@ const MusicTable = ({ resource }) => {
 const MusicPage = () => {
   const [search, setSearch] = useState("");
   const [resource, setResource] = useState<createResourceProp | null>(null);
+  const [startTransition, isPending] = unstable_useTransition({
+    timeoutMs: 4000,
+  });
   const inputRef = useRef() as React.MutableRefObject<HTMLInputElement>;
 
   const onKeyDown = (event) => {
@@ -72,7 +75,9 @@ const MusicPage = () => {
       const ref = inputRef.current;
       if (ref) {
         setSearch(ref.value);
-        setResource(createResource(() => getSongsData(ref.value)));
+        startTransition(() => {
+          setResource(createResource(() => getSongsData(ref.value)));
+        });
       }
     }
   };
@@ -83,7 +88,13 @@ const MusicPage = () => {
         <h2>Music</h2>
         {search && (
           <ResultsPrompt>
-            Results for: <b>{search}</b>
+            {isPending ? (
+              <Loading width="100" />
+            ) : (
+              <p>
+                Results for: <b>{search}</b>
+              </p>
+            )}
           </ResultsPrompt>
         )}
         <StyledInputContainer>

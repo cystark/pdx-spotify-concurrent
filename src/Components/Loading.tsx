@@ -1,8 +1,12 @@
 import React from "react";
 
-const Loading = () => (
+type LoadingProps = {
+  width?: string;
+};
+
+const Loading: React.FC<LoadingProps> = ({ width = 200 }) => (
   <img
-    width="200"
+    width={width}
     src="https://media.giphy.com/media/7uUD5fjU5cUVy/giphy.gif"
   />
 );
