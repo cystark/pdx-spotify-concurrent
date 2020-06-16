@@ -10,6 +10,12 @@ import { getSongsData } from "../api";
 import ErrorBoundary from "../Utils/ErrorBoundary";
 import createResource from "../Utils/createResource";
 
+const StyledWrap = styled(Container)`
+  padding: 20px 0;
+  background-color: ${({ theme }) => theme};
+  transition: background-color 0.3s ease-in-out;
+`;
+
 const StyledInputContainer = styled.div`
   label {
     display: block;
@@ -67,6 +73,8 @@ const MusicPage = () => {
   const [resource, setResource] = useState<createResourceProp | null>(null);
   const [startTransition, isPending] = unstable_useTransition({
     timeoutMs: 4000,
+    busyDelayMs: 400,
+    busyMinDurationMs: 500,
   });
   const inputRef = useRef() as React.MutableRefObject<HTMLInputElement>;
 
@@ -83,35 +91,44 @@ const MusicPage = () => {
   };
 
   return (
-    <Container>
-      <section>
-        <h2>Music</h2>
-        {search && (
-          <ResultsPrompt>
-            {isPending ? (
-              <Loading width="100" />
-            ) : (
-              <p>
-                Results for: <b>{search}</b>
-              </p>
-            )}
-          </ResultsPrompt>
-        )}
-        <StyledInputContainer>
-          <label>
-            <span>Search Artist</span>
-            <input ref={inputRef} onKeyDown={onKeyDown} type="search" />
-          </label>
-        </StyledInputContainer>
-        {resource && (
-          <ErrorBoundary>
-            <React.Suspense fallback={<Loading />}>
-              <MusicTable resource={resource} />
-            </React.Suspense>
-          </ErrorBoundary>
-        )}
-      </section>
-    </Container>
+    <StyledWrap theme={isPending ? "#f9f9f9" : "white"}>
+      <Container>
+        <section>
+          <h2>Music</h2>
+          {search && (
+            <ResultsPrompt>
+              {resource && isPending ? (
+                <Loading width="100" />
+              ) : (
+                <p>
+                  Results for: <b>{search}</b>
+                </p>
+              )}
+            </ResultsPrompt>
+          )}
+          <StyledInputContainer>
+            <label>
+              <span>Search Artist</span>
+              <input ref={inputRef} onKeyDown={onKeyDown} type="search" />
+            </label>
+          </StyledInputContainer>
+          {resource && (
+            <ErrorBoundary>
+              <React.Suspense
+                fallback={
+                  <div>
+                    <Loading />
+                    <div>...Loading</div>
+                  </div>
+                }
+              >
+                <MusicTable resource={resource} />
+              </React.Suspense>
+            </ErrorBoundary>
+          )}
+        </section>
+      </Container>
+    </StyledWrap>
   );
 };
 
