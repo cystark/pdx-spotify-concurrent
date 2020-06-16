@@ -37,7 +37,7 @@ const spotifyApi = new SpotifyWebApi({
 });
 spotifyApi.setAccessToken(process.env.REACT_APP_SPOTIFY_AUTH_CODE);
 
-type dataProps = {
+export type dataProps = {
   artist: string;
   song: string;
   url: string;

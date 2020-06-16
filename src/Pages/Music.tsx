@@ -4,8 +4,11 @@ import styled from "styled-components";
 
 import Container from "../Components/Container";
 import Table from "../Components/Table";
+import Loading from "../Components/Loading";
+
 import { getSongsData } from "../api";
 import ErrorBoundary from "../Utils/ErrorBoundary";
+import createResource from "../Utils/createResource";
 
 const StyledInputContainer = styled.div`
   label {
@@ -29,33 +32,39 @@ const ResultsPrompt = styled.div`
  * Search -> Loading -> Display Resul
  **/
 
-function createResource(asyncFn) {
-  let status = "pending";
-  let result;
-  let promise = asyncFn().then(
-    (r) => {
-      status = "success";
-      result = r;
-    },
-    (e) => {
-      status = "error";
-      result = e;
-    }
-  );
-  return {
-    read() {
-      if (status === "pending") throw promise;
-      if (status === "error") throw result;
-      if (status === "success") return result;
-      return [];
-    },
-  };
-}
+type createResourceProp = {
+  read: () => void;
+};
 
-const spotifyResource = createResource(() => getSongsData("hello"));
+const MusicTable = ({ resource }) => {
+  const data = resource.read();
+  return (
+    <Table>
+      <thead>
+        <tr>
+          <th>Artist</th>
+          <th>Song</th>
+          <th>Url</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.map(({ artist, song, url }) => (
+          <tr key={shortid.generate()}>
+            <td>{artist}</td>
+            <td>{song}</td>
+            <td>
+              <a href={url}>{url}</a>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  );
+};
 
 const MusicPage = () => {
   const [search, setSearch] = useState("");
+  const [resource, setResource] = useState<createResourceProp | null>(null);
   const inputRef = useRef() as React.MutableRefObject<HTMLInputElement>;
 
   const onKeyDown = (event) => {
@@ -63,35 +72,9 @@ const MusicPage = () => {
       const ref = inputRef.current;
       if (ref) {
         setSearch(ref.value);
-        // getSongsData(ref.value).then((d) => setData(d));
+        setResource(createResource(() => getSongsData(ref.value)));
       }
     }
-  };
-
-  const MusicTable = () => {
-    const result = spotifyResource.read();
-    return (
-      <Table>
-        <thead>
-          <tr>
-            <th>Artist</th>
-            <th>Song</th>
-            <th>Url</th>
-          </tr>
-        </thead>
-        <tbody>
-          {result.map(({ artist, song, url }) => (
-            <tr key={shortid.generate()}>
-              <td>{artist}</td>
-              <td>{song}</td>
-              <td>
-                <a href={url}>{url}</a>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    );
   };
 
   return (
@@ -109,11 +92,13 @@ const MusicPage = () => {
             <input ref={inputRef} onKeyDown={onKeyDown} type="search" />
           </label>
         </StyledInputContainer>
-        <ErrorBoundary>
-          <React.Suspense fallback={<div>...Loading</div>}>
-            <MusicTable />
-          </React.Suspense>
-        </ErrorBoundary>
+        {resource && (
+          <ErrorBoundary>
+            <React.Suspense fallback={<Loading />}>
+              <MusicTable resource={resource} />
+            </React.Suspense>
+          </ErrorBoundary>
+        )}
       </section>
     </Container>
   );
