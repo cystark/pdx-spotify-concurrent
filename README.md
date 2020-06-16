@@ -1,3 +1,13 @@
+## Spotify Song Search
+
+## Initial Setup
+
+- Make .env file with .env.example file
+- Note: Need to get details from Spotify account
+- Run commands below
+
+## Create React App
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
