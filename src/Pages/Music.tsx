@@ -29,13 +29,30 @@ const ResultsPrompt = styled.div`
  * Search -> Loading -> Display Resul
  **/
 
-let result;
-let errors;
-let spotifyPromise;
-spotifyPromise = getSongsData("").then(
-  (d) => (result = d),
-  (e) => (errors = e)
-);
+function createResource(asyncFn) {
+  let status = "pending";
+  let result;
+  let promise = asyncFn().then(
+    (r) => {
+      status = "success";
+      result = r;
+    },
+    (e) => {
+      status = "error";
+      result = e;
+    }
+  );
+  return {
+    read() {
+      if (status === "pending") throw promise;
+      if (status === "error") throw result;
+      if (status === "success") return result;
+      return [];
+    },
+  };
+}
+
+const spotifyResource = createResource(() => getSongsData("hello"));
 
 const MusicPage = () => {
   const [search, setSearch] = useState("");
@@ -52,12 +69,7 @@ const MusicPage = () => {
   };
 
   const MusicTable = () => {
-    if (errors) {
-      throw errors;
-    }
-    if (!result) {
-      throw spotifyPromise;
-    }
+    const result = spotifyResource.read();
     return (
       <Table>
         <thead>
